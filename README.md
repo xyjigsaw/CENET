@@ -2,7 +2,7 @@
 
 This is the official code base of the paper
 
-[Temporal Knowledge Graph Reasoning with Historical Contrastive Learning](paper)
+[Temporal Knowledge Graph Reasoning with Historical Contrastive Learning](https://arxiv.org/abs/2211.10904)
 
 ![architecture](architecture.png)
 
