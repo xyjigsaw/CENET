@@ -27,14 +27,14 @@ if use_cuda:
 else:
     raise NotImplementedError
 
-"""
-seed = 987
+
+seed = 999
 np.random.seed(seed)
 torch.manual_seed(seed)
-"""
 
 
-def train(args):
+
+def main_portal(args):
     settings = {}
 
     num_nodes, num_rels, num_t = utils.get_total_number('./data/' + args.dataset, 'stat.txt')
@@ -150,15 +150,20 @@ def train(args):
         settings['main_dirName'] = main_dirName
         file_training = open(os.path.join(main_dirName, "training_record.txt"), "w")
         file_training.write("Training Configuration: \n")
+        file_validation = open(os.path.join(main_dirName, "validation_record.txt"), "w")
+        file_validation.write("Configuration: \n")
         for key in settings:
             file_training.write(key + ': ' + str(settings[key]) + '\n')
+            file_validation.write(key + ': ' + str(settings[key]) + '\n')
         for arg in vars(args):
             file_training.write(arg + ': ' + str(getattr(args, arg)) + '\n')
+            file_validation.write(arg + ': ' + str(getattr(args, arg)) + '\n')
         print("Start training...")
         file_training.write("Training Start \n")
         file_training.write("===============================\n")
 
         epoch = 0
+        best_oracle_all_mrr_lk = 0
         while epoch < args.max_epochs:
             model.train()
             epoch += 1
@@ -210,7 +215,7 @@ def train(args):
             file_training.write("******\nEpoch {:04d} | Loss {:.4f}| time {:.4f}".
                                 format(epoch, loss_epoch / _batch, epoch_time - time_begin) + '\n')
 
-            if args.valid_epochs % epoch == 0 and args.dataset != 'ICEWS14T' and False:
+            if  epoch % args.valid_epochs == 0 and args.dataset != 'ICEWS14T':
                 s_ranks2, o_ranks2, all_ranks2, s_ranks3, o_ranks3, all_ranks3 = valid.execute_valid(args, total_data,
                                                                                                      model, dev_data,
                                                                                                      s_history_dev,
@@ -219,15 +224,36 @@ def train(args):
                                                                                                      dev_o_label,
                                                                                                      dev_s_frequency,
                                                                                                      dev_o_frequency)
-                file_training.write("No Oracle: \n")
-                utils.write2file(s_ranks2, o_ranks2, all_ranks2, file_training)
-                file_training.write("\nGT Oracle: \n")
-                utils.write2file(s_ranks3, o_ranks3, all_ranks3, file_training)
+                file_validation.write("\nNo Oracle: \n")
+                raw_all_mrr_lk = utils.write2file(s_ranks2, o_ranks2, all_ranks2, file_validation)
+                file_validation.write("\nGT Oracle: \n")
+                oracle_all_mrr_lk = utils.write2file(s_ranks3, o_ranks3, all_ranks3, file_validation)
+                file_validation.write("\n-------------------------------------\n")
+                if oracle_all_mrr_lk > best_oracle_all_mrr_lk:
+                    best_oracle_all_mrr_lk = oracle_all_mrr_lk
+                    torch.save(model, model_path + '/' + args.dataset + '_best.pth')
 
-        torch.save(model, model_path + '/' + args.dataset + '_best.pth')
+        
+        s_ranks2, o_ranks2, all_ranks2, s_ranks3, o_ranks3, all_ranks3 = valid.execute_valid(args, total_data,
+                                                                                                     model, dev_data,
+                                                                                                     s_history_dev,
+                                                                                                     o_history_dev,
+                                                                                                     dev_s_label,
+                                                                                                     dev_o_label,
+                                                                                                     dev_s_frequency,
+                                                                                                     dev_o_frequency)
+        file_validation.write("No Oracle: \n")
+        raw_all_mrr_lk = utils.write2file(s_ranks2, o_ranks2, all_ranks2, file_validation)
+        file_validation.write("\nGT Oracle: \n")
+        oracle_all_mrr_lk = utils.write2file(s_ranks3, o_ranks3, all_ranks3, file_validation)
+        if oracle_all_mrr_lk > best_oracle_all_mrr_lk:
+            best_oracle_all_mrr_lk = oracle_all_mrr_lk
+            torch.save(model, model_path + '/' + args.dataset + '_best.pth')
+
         print("Training done")
         file_training.write("Training done")
         file_training.close()
+        file_validation.close()
 
     if args.only_oracle:
         dt_string = args.model_dir
@@ -331,7 +357,7 @@ if __name__ == '__main__':
     parser.add_argument("--batch-size", type=int, default=1024)
     parser.add_argument("--max-epochs", type=int, default=30, help="maximum epochs")
     parser.add_argument("--oracle-epochs", type=int, default=20, help="maximum oracle epochs")
-    parser.add_argument("--valid-epochs", type=int, default=100, help="validation epochs")
+    parser.add_argument("--valid-epochs", type=int, default=5, help="validation epochs")
     parser.add_argument("--alpha", type=float, default=0.1, help="alpha for nceloss")
     parser.add_argument("--lambdax", type=float, default=10, help="lambda")
 
@@ -353,4 +379,4 @@ if __name__ == '__main__':
     print(args_main)
     if not os.path.exists(args_main.save_dir):
         os.makedirs(args_main.save_dir)
-    train(args_main)
+    main_portal(args_main)

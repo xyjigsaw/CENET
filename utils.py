@@ -196,3 +196,4 @@ def write2file(s_ranks, o_ranks, all_ranks, file_test):
         avg_count_all_lk = np.mean((all_ranks <= hit))
         print("ALL test Hits (lk) @ {}: {:.6f}".format(hit, avg_count_all_lk))
         file_test.write("ALL test Hits (lk) @ {}: {:.6f}".format(hit, avg_count_all_lk) + '\n')
+    return all_mrr_lk

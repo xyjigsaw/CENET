@@ -21,7 +21,9 @@ python get_history_graph.py
 python main.py -d YAGO --description yago_hard --max-epochs 30 --oracle-epochs 20 --valid-epochs 5 --alpha 0.2 --lambdax 2 --batch-size 1024 --lr 0.001 --oracle_lr 0.001 --oracle_mode hard --save_dir SAVE --eva_dir SAVE
 ```
 
-Note that we use hard mode for YAGO and WIKI, soft mode for event-based TKGs.
+Note that we use hard mode for YAGO and WIKI, soft mode for event-based TKGs. The model performance fluctuates by less than 1% under different seed settings. For example, you will get better performance than the paper results under the setting of Seed 987.
+
+You can use function **load_all_answers_for_time_filter** and **split_by_time** in ![script](https://github.com/Lee-zix/RE-GCN/blob/master/rgcn/utils.py) implemented by RE-GCN to get the time-aware filtered results.
 
 ## Citation ##
 

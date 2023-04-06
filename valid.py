@@ -47,7 +47,7 @@ def execute_valid(args, total_data, model,
         with torch.no_grad():
             _, _, _, \
             sub_rank2, obj_rank2, cur_loss2, \
-            sub_rank3, obj_rank3, cur_loss3 = model(batch_data, 'Valid', total_data)
+            sub_rank3, obj_rank3, cur_loss3, ce_all_acc = model(batch_data, 'Valid', total_data)
 
             s_ranks2 += sub_rank2
             o_ranks2 += obj_rank2

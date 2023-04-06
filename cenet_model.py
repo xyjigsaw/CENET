@@ -42,7 +42,7 @@ class Oracle(nn.Module):
         super(Oracle, self).__init__()
         self.linear = nn.Sequential(nn.Linear(input_dim, input_dim),
                                     nn.BatchNorm1d(input_dim),
-                                    nn.Dropout(0.2),
+                                    nn.Dropout(0.4),
                                     nn.LeakyReLU(0.2),
                                     nn.Linear(input_dim, out_dim),
                                     )
