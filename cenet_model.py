@@ -303,8 +303,9 @@ class CENET(nn.Module):
     def link_predict(self, nce_loss, preds, ce_loss, actor1, actor2, r, trust_musk, all_triples, pred_known, oracle,
                      history_tag=None, case_study=False):
         if case_study:
-            f = open("case_study.txt", "a+")
-            entity2id, relation2id = get_entity_relation_set(self.args.dataset)
+            # f = open("case_study.txt", "a+")
+            # entity2id, relation2id = get_entity_relation_set(self.args.dataset)
+            pass
 
         if oracle:
             preds = torch.mul(preds, trust_musk)
